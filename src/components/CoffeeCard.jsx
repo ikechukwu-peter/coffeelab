@@ -14,38 +14,41 @@ import { RatingDisplay } from "./RatingDisplay";
 export const CoffeeCard = () => {
   const [state, setState] = useState(null);
 
-  //get screen size
-  const screenSize = window.screen.width;
-
-  const [isMobile, setIsMobile] = useState(screenSize >= 768 ? false : true);
-  const [isTab, setIsTab] = useState(
-    screenSize >= 768 && screenSize <= 1023 ? true : false
-  );
+  const [screenSize, setScreenSize] = useState(window.screen.width);
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(screenSize >= 768 ? false : true);
-      setIsTab(screenSize >= 768 && screenSize <= 1023 ? true : false);
+      setScreenSize(window.screen.width);
     };
-
     window.addEventListener("resize", handleResize);
+    handleResize();
     return () => window.removeEventListener("resize", handleResize);
-  }, [isMobile, isTab]);
+  }, [screenSize]);
 
   useEffect(() => {
     setTimeout(() => {
       setState(coffees);
-    }, 2000);
+    }, 1000);
   }, []);
 
   return (
-    <div className="flex gap-3 py-6 items-center justify-between mt-6">
+    <div
+      className={`flex gap-3 py-6 items-center justify-${
+        !!state?.length ? "between" : "center"
+      } mt-6`}
+    >
       {!!state?.length ? (
         <Swiper
           modules={[Navigation, Pagination, Autoplay]}
           loop={true}
           spaceBetween={10}
-          slidesPerView={isMobile ? 1 : isTab ? 2 : 3}
+          slidesPerView={
+            screenSize < 768
+              ? 1
+              : screenSize >= 768 && screenSize < 1024
+              ? 2
+              : 3
+          }
           navigation={true}
           autoplay={{
             delay: 2500,
@@ -56,14 +59,14 @@ export const CoffeeCard = () => {
           onSwiper={(swiper) => console.log(swiper)}
         >
           {state.map((coffee, index) => (
-            <SwiperSlide key={index}>
+            <SwiperSlide key={index + coffee?.title}>
               <Card {...coffee} />
             </SwiperSlide>
           ))}
         </Swiper>
       ) : (
-        <div className="flex items-center justify-center font-bold text-orange">
-          LOADING
+        <div className="text-center font-bold text-orange uppercase">
+          Loading...
         </div>
       )}
     </div>
